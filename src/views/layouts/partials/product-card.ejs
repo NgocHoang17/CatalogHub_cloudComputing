@@ -1,0 +1,7 @@
+<article class="product-card">
+  <a class="product-visual" href="/products/<%= product.id %>" tabindex="-1" aria-hidden="true"><img src="<%= product.imageUrl || fallback(product.category.slug) %>" data-fallback="<%= fallback(product.category.slug) %>" loading="lazy" alt="<%= product.name %>" width="320" height="220"></a>
+  <div class="product-content"><div class="card-meta"><span class="chip"><%= product.category.name %></span><span class="sku"><%= product.sku %></span></div>
+  <h3><a href="/products/<%= product.id %>"><%= product.name %></a></h3>
+  <p class="product-price"><%= money(product.price) %></p>
+  <a class="detail-link" href="/products/<%= product.id %>">View details <span aria-hidden="true">↗</span></a></div>
+</article>

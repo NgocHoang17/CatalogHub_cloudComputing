@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Discover thoughtful tech for your everyday workflow. CatalogHub product catalog.">
+  <title><%= title %> · CatalogHub</title>
+  <link rel="icon" href="/assets/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/styles.css">
+  <script src="/js/common.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header"><div class="container header-inner">
+  <a class="brand" href="/" aria-label="CatalogHub home"><img src="/assets/logo.svg" width="36" height="36" alt="">Catalog<span>Hub</span></a>
+  <nav aria-label="Main navigation">
+    <a class="<%= active === 'products' ? 'active' : '' %>" href="/" <%= active === 'products' ? 'aria-current=page' : '' %>>Products</a>
+    <% if (writeEnabled) { %><a class="<%= active === 'add' ? 'active' : '' %>" href="/products/new" <%= active === 'add' ? 'aria-current=page' : '' %>>Add Product <span aria-hidden="true">＋</span></a><% } else { %><span class="nav-disabled" aria-disabled="true" title="Demo write access is disabled on this deployment">Add Product</span><% } %>
+  </nav>
+</div></header>

@@ -1,0 +1,41 @@
+<%- include('layouts/partials/header') %>
+<main id="main" class="container">
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-copy">
+      <p class="eyebrow"><span></span> THOUGHTFULLY SELECTED TECH</p>
+      <h1 id="hero-title">Good tech.<br><span>Great possibilities.</span></h1>
+      <p class="hero-description">For the work you love. For the way you live.<br>Discover the essentials that make every day better.</p>
+      <a class="button hero-cta" href="#catalog-title">Explore products <span aria-hidden="true">↗</span></a>
+      <p class="hero-note"><span aria-hidden="true"></span> A better setup starts with the right essentials.</p>
+    </div>
+    <div class="hero-art" aria-label="A selection of everyday tech essentials" role="img">
+      <div class="art-orbit" aria-hidden="true"></div>
+      <span class="art-label">THE EVERYDAY EDIT <span aria-hidden="true">✦</span></span>
+      <img class="hero-laptop" src="/assets/products/laptops.svg" width="460" height="320" alt="">
+      <div class="art-tile headphones-tile"><img src="/assets/products/headphones.svg" width="150" height="110" alt=""><span>Find your focus.</span></div>
+      <div class="art-tile keyboard-tile"><img src="/assets/products/keyboards.svg" width="180" height="100" alt=""><span>Make it your own. <span aria-hidden="true">↗</span></span></div>
+      <span class="art-caption">DESIGNED FOR YOUR EVERYDAY</span>
+    </div>
+  </section>
+  <section class="catalog-section" aria-labelledby="catalog-title">
+    <div class="section-heading"><div><p class="eyebrow">THE COLLECTION</p><h2 id="catalog-title">Your next great find<span>.</span></h2></div><span class="section-note">Discover something that fits you.</span></div>
+    <form id="catalog-form" action="/" method="get" class="filter-panel">
+      <div class="search-row"><label class="search-box" for="q"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7.3"/><path d="m16 16 5 5"/></svg><span class="sr-only">Search products</span><input id="q" name="q" maxlength="100" value="<%= query.q || '' %>" placeholder="Search products by name, SKU, or description..."></label><button class="button" type="submit">Search <span aria-hidden="true">→</span></button></div>
+      <div class="filters"><div class="field"><label for="category">Category</label><select id="category" name="category"><option value="">All categories</option><% categories.forEach(category => { %><option value="<%= category.slug %>" <%= query.category === category.slug ? 'selected' : '' %>><%= category.name %></option><% }) %></select></div>
+      <div class="field"><label for="minPrice">Min price <span>(VND)</span></label><input id="minPrice" name="minPrice" inputmode="decimal" value="<%= query.minPrice || '' %>" placeholder="0"></div>
+      <div class="field"><label for="maxPrice">Max price <span>(VND)</span></label><input id="maxPrice" name="maxPrice" inputmode="decimal" value="<%= query.maxPrice || '' %>" placeholder="No maximum"></div>
+      <div class="field"><label for="sort">Sort by</label><select id="sort" name="sort"><% [['newest','Newest arrivals'],['price_asc','Price: low to high'],['price_desc','Price: high to low'],['name_asc','Name: A to Z']].forEach(([value, label]) => { %><option value="<%= value %>" <%= (query.sort || 'newest') === value ? 'selected' : '' %>><%= label %></option><% }) %></select></div>
+      <input type="hidden" name="limit" value="<%= query.limit || 12 %>"><a class="clear-link" href="/">Clear filters <span aria-hidden="true">↺</span></a></div>
+    </form>
+    <div id="catalog-status" class="results-line" aria-live="polite"><% if (meta) { %>Showing <%= products.length ? (meta.page - 1) * meta.limit + 1 : 0 %>–<%= products.length ? (meta.page - 1) * meta.limit + products.length : 0 %> of <%= meta.total %> products<% } %></div>
+    <div id="catalog-results" aria-busy="false">
+    <% if (loadError) { %><div class="empty-state" role="alert"><span class="state-icon">!</span><h2>Check your filters</h2><p><%= loadError %></p><a class="button secondary" href="/">Reset filters</a></div>
+    <% } else if (!products.length) { %><div class="empty-state"><span class="state-icon">⌕</span><h2><%= meta.total ? 'No products on this page' : query.q || query.category || query.minPrice || query.maxPrice ? 'No matching products' : 'Your next discovery is on its way' %></h2><p>Try a different search or explore the full collection.</p><a class="button secondary" href="/">Explore all products</a></div>
+    <% } else { %><div class="product-grid"><% products.forEach(product => { %><%- include('layouts/partials/product-card', { product }) %><% }) %></div><% } %>
+    </div>
+    <nav id="pagination" class="pagination" aria-label="Product pages"><% if (meta && meta.totalPages) { const pageLink = page => { const params = new URLSearchParams(); Object.entries(query).forEach(([key,value]) => { if (value !== undefined && value !== '') params.set(key,value); }); params.set('page',page); return '/?' + params; }; %>
+      <% if (meta.hasPrevPage) { %><a class="button secondary" href="<%= pageLink(meta.page - 1) %>">← Previous</a><% } else { %><button class="button secondary" disabled>← Previous</button><% } %><span>Page <%= meta.page %> of <%= meta.totalPages %></span><% if (meta.hasNextPage) { %><a class="button secondary" href="<%= pageLink(meta.page + 1) %>">Next →</a><% } else { %><button class="button secondary" disabled>Next →</button><% } %><% } %></nav>
+  </section>
+</main>
+<script src="/js/catalog.js" defer></script>
+<%- include('layouts/partials/footer') %>

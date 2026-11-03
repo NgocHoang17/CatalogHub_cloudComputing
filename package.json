@@ -1,0 +1,35 @@
+{
+  "name": "cataloghub",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A Railway-ready Node.js and MySQL product catalog",
+  "engines": {
+    "node": "24.x"
+  },
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "test": "node --test tests/product.validation.test.js tests/api.contract.test.js tests/server.lifecycle.test.js",
+    "test:integration": "node --test tests/database.integration.test.js",
+    "db:check": "node scripts/db-check.js",
+    "db:import": "node scripts/db-import.js",
+    "test:browser": "node scripts/browser-check.js"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.2.1",
+    "helmet": "^8.1.0",
+    "mysql2": "^3.15.3",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10",
+    "playwright": "^1.56.1",
+    "supertest": "^7.1.4"
+  },
+  "overrides": {
+    "minimatch": "^11.0.1"
+  }
+}
