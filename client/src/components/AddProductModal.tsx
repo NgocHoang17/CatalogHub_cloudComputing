@@ -1,7 +1,14 @@
 import React, { useState } from 'react';
-import { X, Loader2, Sparkles } from 'lucide-react';
+import { X, Loader2 } from 'lucide-react';
+import { CreateProductDTO } from '../types/product.ts';
 
-export function AddProductModal({ isOpen, onClose, onSubmit }) {
+interface AddProductModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (data: CreateProductDTO) => Promise<void>;
+}
+
+export const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSubmit }) => {
   const [formData, setFormData] = useState({
     sku: '',
     name: '',
@@ -12,16 +19,16 @@ export function AddProductModal({ isOpen, onClose, onSubmit }) {
     description: '',
   });
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSubmitting(true);
@@ -37,8 +44,8 @@ export function AddProductModal({ isOpen, onClose, onSubmit }) {
         description: formData.description.trim(),
       });
       onClose();
-    } catch (err) {
-      setError(err.message);
+    } catch (err: any) {
+      setError(err.message || 'An unexpected error occurred');
     } finally {
       setSubmitting(false);
     }
@@ -212,5 +219,5 @@ export function AddProductModal({ isOpen, onClose, onSubmit }) {
       </div>
     </div>
   );
-}
+};
 

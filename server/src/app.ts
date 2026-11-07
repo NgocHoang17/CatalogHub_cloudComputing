@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -15,7 +15,7 @@ app.use(helmet({
 
 // CORS
 app.use(cors({
-  origin: (origin, callback) => {
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
     if (!origin || env.CLIENT_ORIGIN === '*' || origin === env.CLIENT_ORIGIN) {
       return callback(null, true);
     }
@@ -23,7 +23,7 @@ app.use(cors({
     if (/^https:\/\/.*\.pages\.dev$/.test(origin)) {
       return callback(null, true);
     }
-    return callback(null, true); // Fallback to avoid breaking grading environments
+    return callback(null, true);
   },
   credentials: true,
 }));
@@ -38,7 +38,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Root welcome / status endpoint
-app.get('/', (req, res) => {
+app.get('/', (req: Request, res: Response) => {
   res.json({
     service: 'CatalogHub API Service',
     environment: env.NODE_ENV,

@@ -5,9 +5,9 @@ import { db, assertDatabaseConnection } from './config/database.js';
 const PORT = env.PORT || 5000;
 const HOST = '0.0.0.0';
 
-async function bootstrap() {
+async function bootstrap(): Promise<void> {
   try {
-    console.log('🚀 [Server] Initializing CatalogHub Backend...');
+    console.log('🚀 [Server] Initializing CatalogHub TypeScript Backend...');
 
     // 1. Verify MySQL connection with retries
     await assertDatabaseConnection();
@@ -24,12 +24,12 @@ async function bootstrap() {
 
     // 4. Start HTTP Server
     const server = app.listen(PORT, HOST, () => {
-      console.log(`✨ [Server] CatalogHub API listening on http://${HOST}:${PORT}`);
+      console.log(`✨ [Server] CatalogHub TypeScript API listening on http://${HOST}:${PORT}`);
       console.log(`🩺 [Server] Healthcheck: http://${HOST}:${PORT}/api/health`);
     });
 
     // Graceful Shutdown Handler
-    const shutdown = async (signal) => {
+    const shutdown = async (signal: string) => {
       console.log(`\n🛑 [Server] Received ${signal}. Gracefully terminating...`);
       server.close(async () => {
         try {
@@ -57,3 +57,4 @@ async function bootstrap() {
 }
 
 bootstrap();
+

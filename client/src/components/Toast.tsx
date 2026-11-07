@@ -1,7 +1,13 @@
 import React from 'react';
 import { CheckCircle2, AlertCircle, X } from 'lucide-react';
+import { ToastMessage } from '../types/product.ts';
 
-export function Toast({ toast, onClose }) {
+interface ToastProps {
+  toast: ToastMessage | null;
+  onClose: () => void;
+}
+
+export const Toast: React.FC<ToastProps> = ({ toast, onClose }) => {
   if (!toast) return null;
 
   const isSuccess = toast.type === 'success';
@@ -22,5 +28,5 @@ export function Toast({ toast, onClose }) {
       </button>
     </div>
   );
-}
+};
 

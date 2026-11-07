@@ -1,6 +1,16 @@
 import React from 'react';
 
-export function CategoryFilter({ categories, selectedCategory, onSelectCategory }) {
+interface CategoryFilterProps {
+  categories: string[];
+  selectedCategory: string;
+  onSelectCategory: (cat: string) => void;
+}
+
+export const CategoryFilter: React.FC<CategoryFilterProps> = ({
+  categories,
+  selectedCategory,
+  onSelectCategory,
+}) => {
   const allCategories = ['All', ...categories];
 
   return (
@@ -23,5 +33,5 @@ export function CategoryFilter({ categories, selectedCategory, onSelectCategory 
       })}
     </div>
   );
-}
+};
 

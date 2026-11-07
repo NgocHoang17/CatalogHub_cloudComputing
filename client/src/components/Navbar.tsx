@@ -1,7 +1,13 @@
 import React from 'react';
-import { Package, Plus, Cloud, Database, Activity } from 'lucide-react';
+import { Package, Plus } from 'lucide-react';
+import { HealthResponse } from '../types/product.ts';
 
-export function Navbar({ health, onOpenAddModal }) {
+interface NavbarProps {
+  health: HealthResponse | null;
+  onOpenAddModal: () => void;
+}
+
+export const Navbar: React.FC<NavbarProps> = ({ health, onOpenAddModal }) => {
   const isHealthy = health?.status === 'UP';
 
   return (
@@ -15,10 +21,10 @@ export function Navbar({ health, onOpenAddModal }) {
             <div className="flex items-center gap-2">
               <h1 className="text-lg font-bold text-slate-900 tracking-tight">CatalogHub</h1>
               <span className="text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-                Cloud Native
+                TypeScript &bull; Cloud Native
               </span>
             </div>
-            <p className="text-xs text-slate-500">NodeJS + MySQL + Cloudflare Pages + Railway</p>
+            <p className="text-xs text-slate-500">NodeJS TS + MySQL + Cloudflare Pages + Railway</p>
           </div>
         </div>
 
@@ -51,5 +57,5 @@ export function Navbar({ health, onOpenAddModal }) {
       </div>
     </header>
   );
-}
+};
 

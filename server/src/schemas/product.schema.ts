@@ -25,9 +25,12 @@ export const getProductsQuerySchema = z.object({
     search: z.string().trim().optional().default(''),
     category: z.string().trim().optional().default(''),
     sortBy: z.enum(['created_at', 'price', 'name', 'stock']).optional().default('created_at'),
-    order: z.enum(['ASC', 'DESC', 'asc', 'desc']).optional().default('DESC').transform((val) => val.toUpperCase()),
+    order: z.enum(['ASC', 'DESC', 'asc', 'desc']).optional().default('DESC').transform((val) => val.toUpperCase() as 'ASC' | 'DESC'),
     page: z.coerce.number().int().min(1).optional().default(1),
     limit: z.coerce.number().int().min(1).max(100).optional().default(12),
   }),
 });
+
+export type CreateProductInput = z.infer<typeof createProductSchema>['body'];
+export type GetProductsQueryInput = z.infer<typeof getProductsQuerySchema>['query'];
 

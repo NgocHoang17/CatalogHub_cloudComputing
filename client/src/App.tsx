@@ -1,32 +1,33 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Navbar } from './components/Navbar';
-import { SearchBar } from './components/SearchBar';
-import { CategoryFilter } from './components/CategoryFilter';
-import { ProductCard } from './components/ProductCard';
-import { AddProductModal } from './components/AddProductModal';
-import { Toast } from './components/Toast';
-import { api } from './services/api';
+import { useState, useEffect, useCallback } from 'react';
+import { Navbar } from './components/Navbar.tsx';
+import { SearchBar } from './components/SearchBar.tsx';
+import { CategoryFilter } from './components/CategoryFilter.tsx';
+import { ProductCard } from './components/ProductCard.tsx';
+import { AddProductModal } from './components/AddProductModal.tsx';
+import { Toast } from './components/Toast.tsx';
+import { api } from './services/api.ts';
+import { Product, HealthResponse, CreateProductDTO, ToastMessage } from './types/product.ts';
 import { Loader2, PackageSearch, RefreshCw } from 'lucide-react';
 
 export default function App() {
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [health, setHealth] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [health, setHealth] = useState<HealthResponse | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Filter States
-  const [search, setSearch] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [sortBy, setSortBy] = useState('created_at-DESC');
+  const [search, setSearch] = useState<string>('');
+  const [debouncedSearch, setDebouncedSearch] = useState<string>('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [sortBy, setSortBy] = useState<string>('created_at-DESC');
 
   // Modal & Toast States
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [toast, setToast] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [toast, setToast] = useState<ToastMessage | null>(null);
 
   // Show Toast Helper
-  const showToast = (message, type = 'success') => {
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 4000);
   };
@@ -74,8 +75,8 @@ export default function App() {
       if (res.success) {
         setProducts(res.data);
       }
-    } catch (err) {
-      setError(err.message);
+    } catch (err: any) {
+      setError(err.message || 'Failed to retrieve products');
     } finally {
       setLoading(false);
     }
@@ -93,7 +94,7 @@ export default function App() {
   }, [fetchProducts]);
 
   // Add product handler
-  const handleAddProduct = async (productData) => {
+  const handleAddProduct = async (productData: CreateProductDTO) => {
     const res = await api.createProduct(productData);
     if (res.success) {
       showToast(`Product "${productData.name}" created successfully!`, 'success');
@@ -113,14 +114,14 @@ export default function App() {
           <div className="absolute right-0 top-0 bottom-0 w-1/2 opacity-10 pointer-events-none bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-400 via-transparent to-transparent" />
           <div className="relative z-10 max-w-2xl">
             <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-300 border border-blue-400/30 mb-3">
-              Cloud Computing Course Project
+              TypeScript &bull; Cloud Computing Project
             </span>
             <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight mb-3">
               Product Inventory & Cloud Catalog
             </h2>
             <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
               Decoupled cloud architecture featuring Cloudflare Pages (Frontend Edge CDN), 
-              NodeJS Express (Railway PaaS), and MySQL Managed Database connected via Railway Private Networking.
+              NodeJS TypeScript Express (Railway PaaS), and MySQL Managed Database connected via Railway Private Networking.
             </p>
           </div>
         </section>
@@ -192,7 +193,7 @@ export default function App() {
       {/* Footer */}
       <footer className="bg-white border-t border-slate-200 py-6 mt-12">
         <div className="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500 space-y-1">
-          <p className="font-semibold text-slate-700">CatalogHub &bull; Cloud Computing Final Project</p>
+          <p className="font-semibold text-slate-700">CatalogHub &bull; Cloud Computing Final Project (TypeScript Edition)</p>
           <p>Frontend: Cloudflare Pages &bull; Backend: Railway NodeJS Container &bull; DB: Railway MySQL Private Mesh</p>
         </div>
       </footer>

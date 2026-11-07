@@ -1,6 +1,7 @@
 # 📦 CatalogHub: Cloud Computing Course Project
 
 [![CI Pipeline](https://github.com/huy/CatalogHub_cloudComputing/actions/workflows/ci.yml/badge.svg)](https://github.com/huy/CatalogHub_cloudComputing/actions/workflows/ci.yml)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-v20-339933?logo=node.js&logoColor=white)
 ![Express](https://img.shields.io/badge/Express-4.x-000000?logo=express&logoColor=white)
 ![Knex.js](https://img.shields.io/badge/Knex.js-Migrations-E15433?logo=knex&logoColor=white)

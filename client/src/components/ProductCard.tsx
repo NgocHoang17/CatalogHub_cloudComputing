@@ -1,15 +1,20 @@
 import React from 'react';
-import { Tag, CheckCircle2, AlertTriangle, XCircle } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, XCircle, LucideIcon } from 'lucide-react';
+import { Product } from '../types/product.ts';
 
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1526738549149-8e07eca6c147?w=800&auto=format&fit=crop&q=60';
 
-export function ProductCard({ product }) {
+interface ProductCardProps {
+  product: Product;
+}
+
+export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const formattedPrice = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
-  }).format(product.price);
+  }).format(Number(product.price));
 
-  const getStockStatus = (stock) => {
+  const getStockStatus = (stock: number): { label: string; color: string; icon: LucideIcon } => {
     if (stock > 10) return { label: `${stock} in stock`, color: 'text-emerald-600 bg-emerald-50', icon: CheckCircle2 };
     if (stock > 0) return { label: `Only ${stock} left`, color: 'text-amber-600 bg-amber-50', icon: AlertTriangle };
     return { label: 'Out of stock', color: 'text-rose-600 bg-rose-50', icon: XCircle };
@@ -27,7 +32,7 @@ export function ProductCard({ product }) {
           alt={product.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           onError={(e) => {
-            e.currentTarget.src = FALLBACK_IMAGE;
+            (e.currentTarget as HTMLImageElement).src = FALLBACK_IMAGE;
           }}
           loading="lazy"
         />
@@ -68,5 +73,5 @@ export function ProductCard({ product }) {
       </div>
     </article>
   );
-}
+};
 

@@ -1,7 +1,19 @@
 import React from 'react';
 import { Search, ArrowUpDown, X } from 'lucide-react';
 
-export function SearchBar({ search, onSearchChange, sortBy, onSortChange }) {
+interface SearchBarProps {
+  search: string;
+  onSearchChange: (val: string) => void;
+  sortBy: string;
+  onSortChange: (val: string) => void;
+}
+
+export const SearchBar: React.FC<SearchBarProps> = ({
+  search,
+  onSearchChange,
+  sortBy,
+  onSortChange,
+}) => {
   return (
     <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
       {/* Search Input */}
@@ -43,5 +55,5 @@ export function SearchBar({ search, onSearchChange, sortBy, onSortChange }) {
       </div>
     </div>
   );
-}
+};
 

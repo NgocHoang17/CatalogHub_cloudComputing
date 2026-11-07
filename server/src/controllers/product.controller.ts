@@ -1,9 +1,12 @@
+import { Request, Response, NextFunction } from 'express';
 import { productService } from '../services/product.service.js';
+import { ProductFilterParams } from '../types/index.js';
 
 export class ProductController {
-  async getProducts(req, res, next) {
+  async getProducts(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const result = await productService.getProducts(req.query);
+      const queryParams = req.query as unknown as ProductFilterParams;
+      const result = await productService.getProducts(queryParams);
       res.json({
         success: true,
         data: result.items,
@@ -14,7 +17,7 @@ export class ProductController {
     }
   }
 
-  async createProduct(req, res, next) {
+  async createProduct(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const product = await productService.addProduct(req.body);
       res.status(201).json({
@@ -27,7 +30,7 @@ export class ProductController {
     }
   }
 
-  async getCategories(req, res, next) {
+  async getCategories(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const categories = await productService.getCategories();
       res.json({
@@ -39,11 +42,11 @@ export class ProductController {
     }
   }
 
-  async getHealth(req, res, next) {
+  async getHealth(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const metrics = await productService.getHealthMetrics();
       res.json(metrics);
-    } catch (err) {
+    } catch (err: any) {
       res.status(503).json({
         status: 'DEGRADED',
         error: err.message,

@@ -1,9 +1,10 @@
 import { productRepository } from '../repositories/product.repository.js';
 import { AppError } from '../middlewares/error.middleware.js';
 import { db } from '../config/database.js';
+import { Product, CreateProductDTO, ProductFilterParams, PaginationMeta, HealthResponse } from '../types/index.js';
 
 export class ProductService {
-  async getProducts(params) {
+  async getProducts(params: ProductFilterParams): Promise<{ items: Product[]; pagination: PaginationMeta }> {
     const { search, category, sortBy, order, page, limit } = params;
     const offset = (page - 1) * limit;
 
@@ -23,8 +24,7 @@ export class ProductService {
     };
   }
 
-  async addProduct(productData) {
-    // Check SKU uniqueness
+  async addProduct(productData: CreateProductDTO): Promise<Product> {
     const existing = await productRepository.findBySku(productData.sku);
     if (existing) {
       throw new AppError(`A product with SKU '${productData.sku}' already exists.`, 409);
@@ -33,13 +33,13 @@ export class ProductService {
     return productRepository.createProduct(productData);
   }
 
-  async getCategories() {
+  async getCategories(): Promise<string[]> {
     return productRepository.findDistinctCategories();
   }
 
-  async getHealthMetrics() {
+  async getHealthMetrics(): Promise<HealthResponse> {
     const start = Date.now();
-    const [dbResult] = await db.raw('SELECT 1 + 1 AS ping, (SELECT COUNT(*) FROM products) AS total');
+    const [dbResult]: any = await db.raw('SELECT 1 + 1 AS ping, (SELECT COUNT(*) FROM products) AS total');
     const latencyMs = Date.now() - start;
 
     return {
