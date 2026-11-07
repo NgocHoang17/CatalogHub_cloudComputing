@@ -12,13 +12,13 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=5000
 
-# Security: Run as unprivileged user
-USER node
-
 # Copy dependencies and application code
 COPY --chown=node:node --from=dependencies /app/node_modules ./node_modules
 COPY --chown=node:node package*.json knexfile.js ./
 COPY --chown=node:node src/ ./src/
+
+# Security: Run as unprivileged user
+USER node
 
 EXPOSE 5000
 
