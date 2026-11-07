@@ -1,59 +1,4 @@
 import app from './app.js';
-import { testConnection, pool } from './config/db.js';
-import { runMigrations } from './database/migrator.js';
-
-const PORT = process.env.PORT || 5000;
-const HOST = '0.0.0.0';
-
-async function bootstrap() {
-  try {
-    console.log('🚀 [Server] Initializing CatalogHub Backend...');
-    
-    // 1. Establish MySQL Connection
-    await testConnection();
-
-    // 2. Execute Flyway-style Database Migrations
-    await runMigrations();
-
-    // 3. Start Express HTTP Server
-    const server = app.listen(PORT, HOST, () => {
-      console.log(`✨ [Server] CatalogHub API listening on http://${HOST}:${PORT}`);
-      console.log(`🩺 [Server] Healthcheck: http://${HOST}:${PORT}/api/health`);
-    });
-
-    // Graceful Shutdown handlers for Container environments
-    const shutdown = async (signal) => {
-      console.log(`\n🛑 [Server] Received ${signal}. Starting graceful shutdown...`);
-      server.close(async () => {
-        console.log('🔒 [Server] Closed HTTP server connections.');
-        try {
-          await pool.end();
-          console.log('🔒 [Database] MySQL connection pool closed.');
-          process.exit(0);
-        } catch (err) {
-          console.error('❌ [Database] Error closing pool:', err);
-          process.exit(1);
-        }
-      });
-
-      // Force shutdown after 10s timeout
-      setTimeout(() => {
-        console.error('⚠️ [Server] Forced shutdown after timeout');
-        process.exit(1);
-      }, 10000);
-    };
-
-    process.on('SIGTERM', () => shutdown('SIGTERM'));
-    process.on('SIGINT', () => shutdown('SIGINT'));
-  } catch (error) {
-    console.error('💥 [Server] Failed to bootstrap application:', error);
-    process.exit(1);
-  }
-}
-
-bootstrap();
-
-import app from './app.js';
 import { env } from './config/env.js';
 import { db, assertDatabaseConnection } from './config/database.js';
 
@@ -112,4 +57,3 @@ async function bootstrap() {
 }
 
 bootstrap();
-
