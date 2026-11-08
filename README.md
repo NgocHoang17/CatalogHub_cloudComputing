@@ -28,24 +28,19 @@ flowchart TD
     User["🌐 End User (Browser)"]
 
     subgraph Cloudflare["☁️ Cloudflare Global Edge Network"]
-        CF_CDN["Cloudflare Pages (Global CDN)"]
-        StaticAssets["React 18 SPA (Vite + Tailwind CSS)\nMulti-region Edge Distribution"]
+        CF_CDN["⚡ Cloudflare Pages (Global CDN)<br/>catalog.nhuhuy.id.vn"]
+        StaticAssets["React 18 SPA (Vite + Tailwind CSS)<br/>Multi-region Edge Distribution"]
     end
 
     subgraph Railway["🚂 Railway.app Cloud Platform"]
-        subgraph PublicZone["Public Facing Zone"]
-            NodeBE["NodeJS Express Service\nLayered Architecture (Controller-Service-Repo)\nPort: 5000"]
-        end
-
-        subgraph PrivateMesh["Private Network Mesh (railway.internal)"]
-            MySQLDB[("MySQL 8.0 Database\nmysql.railway.internal:3306\nManaged by Knex Migrations")]
-        end
+        NodeBE["🚀 NodeJS Express Service<br/>Layered Architecture<br/>Port: 5000"]
+        MySQLDB[("🗄️ MySQL 8.0 Database<br/>mysql.railway.internal:3306<br/>Managed by Knex Migrations")]
     end
 
-    User -->|HTTPS: 443| CF_CDN
+    User -->|"HTTPS: 443"| CF_CDN
     CF_CDN --> StaticAssets
-    User -->|REST API Calls (HTTPS: 443)| NodeBE
-    NodeBE -->|Private Network WireGuard Mesh| MySQLDB
+    User -->|"REST API: 443"| NodeBE
+    NodeBE -->|"Private Network WireGuard Mesh"| MySQLDB
 ```
 
 ---
