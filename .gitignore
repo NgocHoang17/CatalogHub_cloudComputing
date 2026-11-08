@@ -1,24 +1,34 @@
+# Dependencies
 node_modules/
+.pnp
+.pnp.js
+
+# Environment & Secrets
 .env
 .env.*
 !.env.example
-*.log
-coverage/
-test-results/
-.local/
 *.pem
-*.key
+
+# Build & Bundles
+dist/
+build/
+out/
+.cache/
+*.tsbuildinfo
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+
+# OS & Editors
 .DS_Store
 Thumbs.db
 .idea/
 .vscode/
-playwright-report/
-*.sql.gz
-*.dump
-.DS_Store
-Thumbs.db
-.idea/
-.vscode/
-playwright-report/
-*.sql.gz
-*.dump
+*.swp
+
+# Local Docker Data
+mysql_data/
+
