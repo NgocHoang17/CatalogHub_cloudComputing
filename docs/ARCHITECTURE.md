@@ -13,27 +13,22 @@ flowchart TD
     User["🌐 End User (Web Browser)"]
 
     subgraph Cloudflare["☁️ Cloudflare Global Edge Network"]
-        CF_CDN["Cloudflare Pages (Global CDN)"]
-        CF_Edge["SSL / DDoS Shield / 300+ Edge Locations"]
-        StaticBundle["React 18 SPA (Vite + Tailwind CSS)\nOptimized Build in /dist"]
+        CF_CDN["⚡ Cloudflare Pages (Global CDN)<br/>catalog.nhuhuy.id.vn"]
+        CF_Edge["🛡️ SSL / DDoS Shield / 300+ Edge Locations"]
+        StaticBundle["React 18 SPA (Vite + Tailwind CSS)<br/>Optimized Build in /dist"]
     end
 
     subgraph Railway["🚂 Railway.app Cloud Platform"]
-        subgraph PublicZone["Public Facing Zone"]
-            NodeAPI["NodeJS Express Service (Container)\nLayered Architecture (Controller-Service-Repo)\nPort: 5000"]
-        end
-
-        subgraph PrivateMesh["Private Network Mesh (railway.internal)"]
-            MySQLDB[("MySQL 8.0 Database\nmysql.railway.internal:3306\nManaged by Knex Migrations")]
-        end
+        NodeAPI["🚀 NodeJS Express Service (Container)<br/>Layered Architecture<br/>Port: 5000"]
+        MySQLDB[("🗄️ MySQL 8.0 Database<br/>mysql.railway.internal:3306<br/>Managed by Knex Migrations")]
     end
 
-    User -->|HTTPS: 443| CF_Edge
+    User -->|"HTTPS: 443"| CF_Edge
     CF_Edge --> CF_CDN
     CF_CDN --> StaticBundle
 
-    User -->|REST API JSON (HTTPS: 443)| NodeAPI
-    NodeAPI -->|Private Mesh / Encrypted WireGuard| MySQLDB
+    User -->|"REST API JSON: 443"| NodeAPI
+    NodeAPI -->|"Private Mesh / Encrypted WireGuard"| MySQLDB
 ```
 
 ---
