@@ -14,6 +14,11 @@
 
 > **Course Topic:** Building and deploying a NodeJS + MySQL application on Railway.app featuring product addition and search capabilities. Include detailed documentation on the deployment process and MySQL connection setup.
 
+### 🌐 Live Production Deployments
+* **Production Frontend:** [https://catalog.nhuhuy.id.vn](https://catalog.nhuhuy.id.vn) *(Cloudflare Pages + Custom Domain + Edge CDN)*
+* **Production API:** [https://catalog-cloud-computing-production.up.railway.app](https://catalog-cloud-computing-production.up.railway.app) *(Railway.app Container)*
+* **Health Check Endpoint:** [https://catalog-cloud-computing-production.up.railway.app/api/health](https://catalog-cloud-computing-production.up.railway.app/api/health) *(Real-time MySQL connection & status)*
+
 ---
 
 ## 🏛️ System & Cloud Architecture
