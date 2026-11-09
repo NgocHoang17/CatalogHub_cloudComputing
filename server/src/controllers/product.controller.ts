@@ -30,6 +30,46 @@ export class ProductController {
     }
   }
 
+  async getProductById(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const id = Number(req.params.id);
+      const product = await productService.getProductById(id);
+      res.json({
+        success: true,
+        data: product,
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async updateProduct(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const id = Number(req.params.id);
+      const updated = await productService.updateProduct(id, req.body);
+      res.json({
+        success: true,
+        message: 'Product updated successfully',
+        data: updated,
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async deleteProduct(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const id = Number(req.params.id);
+      await productService.deleteProduct(id);
+      res.json({
+        success: true,
+        message: 'Product deleted successfully',
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+
   async getCategories(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const categories = await productService.getCategories();

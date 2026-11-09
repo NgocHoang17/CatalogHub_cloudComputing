@@ -8,12 +8,13 @@ export class ProductRepository {
   async findProducts(params: {
     search?: string;
     category?: string;
+    stockStatus?: 'all' | 'in_stock' | 'low_stock' | 'out_of_stock';
     sortBy: string;
     order: 'ASC' | 'DESC';
     offset: number;
     limit: number;
   }): Promise<Product[]> {
-    const { search, category, sortBy, order, offset, limit } = params;
+    const { search, category, stockStatus, sortBy, order, offset, limit } = params;
     const query = db<Product>('products').select('*');
 
     if (search) {
@@ -29,6 +30,16 @@ export class ProductRepository {
       query.andWhere('category', category);
     }
 
+    if (stockStatus && stockStatus !== 'all') {
+      if (stockStatus === 'in_stock') {
+        query.andWhere('stock', '>', 10);
+      } else if (stockStatus === 'low_stock') {
+        query.andWhereBetween('stock', [1, 10]);
+      } else if (stockStatus === 'out_of_stock') {
+        query.andWhere('stock', '<=', 0);
+      }
+    }
+
     query.orderBy(sortBy, order);
     query.limit(limit).offset(offset);
 
@@ -38,8 +49,12 @@ export class ProductRepository {
   /**
    * Count total matching products for pagination metadata
    */
-  async countProducts(params: { search?: string; category?: string }): Promise<number> {
-    const { search, category } = params;
+  async countProducts(params: {
+    search?: string;
+    category?: string;
+    stockStatus?: 'all' | 'in_stock' | 'low_stock' | 'out_of_stock';
+  }): Promise<number> {
+    const { search, category, stockStatus } = params;
     const query = db('products').count('id as total');
 
     if (search) {
@@ -53,6 +68,16 @@ export class ProductRepository {
 
     if (category && category !== 'All') {
       query.andWhere('category', category);
+    }
+
+    if (stockStatus && stockStatus !== 'all') {
+      if (stockStatus === 'in_stock') {
+        query.andWhere('stock', '>', 10);
+      } else if (stockStatus === 'low_stock') {
+        query.andWhereBetween('stock', [1, 10]);
+      } else if (stockStatus === 'out_of_stock') {
+        query.andWhere('stock', '<=', 0);
+      }
     }
 
     const result = await query.first();
@@ -83,6 +108,22 @@ export class ProductRepository {
       throw new Error('Failed to retrieve newly created product');
     }
     return created;
+  }
+
+  /**
+   * Update an existing product
+   */
+  async updateProduct(id: number, data: Partial<CreateProductDTO>): Promise<Product | undefined> {
+    await db('products').where({ id }).update(data);
+    return this.findById(id);
+  }
+
+  /**
+   * Delete a product by ID
+   */
+  async deleteProduct(id: number): Promise<boolean> {
+    const rowsAffected = await db('products').where({ id }).delete();
+    return rowsAffected > 0;
   }
 
   /**

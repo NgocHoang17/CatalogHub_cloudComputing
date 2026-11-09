@@ -1,14 +1,16 @@
 import React from 'react';
-import { CheckCircle2, AlertTriangle, XCircle, LucideIcon } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, XCircle, LucideIcon, Pencil, Trash2 } from 'lucide-react';
 import { Product } from '../types/product.ts';
 
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1526738549149-8e07eca6c147?w=800&auto=format&fit=crop&q=60';
 
 interface ProductCardProps {
   product: Product;
+  onEdit?: (product: Product) => void;
+  onDelete?: (product: Product) => void;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+export const ProductCard: React.FC<ProductCardProps> = ({ product, onEdit, onDelete }) => {
   const formattedPrice = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
@@ -59,7 +61,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         </p>
 
         {/* Footer */}
-        <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+        <div className="pt-3 border-t border-slate-100 flex items-center justify-between mb-3">
           <div>
             <span className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold block">Price</span>
             <span className="text-lg font-extrabold text-slate-900">{formattedPrice}</span>
@@ -70,8 +72,25 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             <span>{stockStatus.label}</span>
           </div>
         </div>
+
+        {/* Action Controls */}
+        <div className="flex items-center gap-2 pt-2 border-t border-slate-50">
+          <button
+            onClick={() => onEdit?.(product)}
+            className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-blue-50 text-slate-700 hover:text-blue-700 rounded-lg text-xs font-semibold border border-slate-200 hover:border-blue-200 transition-colors"
+          >
+            <Pencil className="w-3.5 h-3.5" />
+            <span>Edit</span>
+          </button>
+          <button
+            onClick={() => onDelete?.(product)}
+            className="inline-flex items-center justify-center p-1.5 bg-slate-50 hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-lg border border-slate-200 hover:border-rose-200 transition-colors"
+            title="Delete product"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
     </article>
   );
 };
-

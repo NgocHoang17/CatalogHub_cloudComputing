@@ -1,4 +1,4 @@
-import { Product, CreateProductDTO, ApiResponse, HealthResponse } from '../types/product.ts';
+import { Product, CreateProductDTO, ApiResponse, HealthResponse, StockStatus } from '../types/product.ts';
 
 const getBaseUrl = (): string => {
   if (import.meta.env.VITE_API_BASE_URL) {
@@ -42,6 +42,7 @@ export const api = {
   getProducts: (params: {
     search?: string;
     category?: string;
+    stockStatus?: StockStatus;
     sortBy?: string;
     order?: string;
     page?: number;
@@ -59,6 +60,20 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(data),
     }),
+
+  updateProduct: (id: number, data: Partial<CreateProductDTO>): Promise<ApiResponse<Product>> =>
+    request<ApiResponse<Product>>(`/api/products/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  deleteProduct: (id: number): Promise<ApiResponse<{ message: string }>> =>
+    request<ApiResponse<{ message: string }>>(`/api/products/${id}`, {
+      method: 'DELETE',
+    }),
+
+  getProductById: (id: number): Promise<ApiResponse<Product>> =>
+    request<ApiResponse<Product>>(`/api/products/${id}`),
 
   getCategories: (): Promise<ApiResponse<string[]>> =>
     request<ApiResponse<string[]>>('/api/products/categories'),

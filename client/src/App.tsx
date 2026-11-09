@@ -2,11 +2,15 @@ import { useState, useEffect, useCallback } from 'react';
 import { Navbar } from './components/Navbar.tsx';
 import { SearchBar } from './components/SearchBar.tsx';
 import { CategoryFilter } from './components/CategoryFilter.tsx';
+import { StockFilter } from './components/StockFilter.tsx';
+import { Pagination } from './components/Pagination.tsx';
 import { ProductCard } from './components/ProductCard.tsx';
 import { AddProductModal } from './components/AddProductModal.tsx';
+import { EditProductModal } from './components/EditProductModal.tsx';
+import { DeleteConfirmModal } from './components/DeleteConfirmModal.tsx';
 import { Toast } from './components/Toast.tsx';
 import { api } from './services/api.ts';
-import { Product, HealthResponse, CreateProductDTO, ToastMessage } from './types/product.ts';
+import { Product, HealthResponse, CreateProductDTO, ToastMessage, StockStatus, PaginationMeta } from './types/product.ts';
 import { Loader2, PackageSearch, RefreshCw } from 'lucide-react';
 
 export default function App() {
@@ -16,14 +20,20 @@ export default function App() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Filter States
+  // Filter & Pagination States
   const [search, setSearch] = useState<string>('');
   const [debouncedSearch, setDebouncedSearch] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [stockStatus, setStockStatus] = useState<StockStatus>('all');
   const [sortBy, setSortBy] = useState<string>('created_at-DESC');
+  const [page, setPage] = useState<number>(1);
+  const [limit, setLimit] = useState<number>(12);
+  const [pagination, setPagination] = useState<PaginationMeta | null>(null);
 
   // Modal & Toast States
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
   const [toast, setToast] = useState<ToastMessage | null>(null);
 
   // Show Toast Helper
@@ -36,6 +46,7 @@ export default function App() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
+      setPage(1);
     }, 300);
     return () => clearTimeout(timer);
   }, [search]);
@@ -69,18 +80,24 @@ export default function App() {
       const res = await api.getProducts({
         search: debouncedSearch,
         category: selectedCategory,
+        stockStatus,
         sortBy: col,
         order: dir,
+        page,
+        limit,
       });
       if (res.success) {
         setProducts(res.data);
+        if (res.pagination) {
+          setPagination(res.pagination);
+        }
       }
     } catch (err: any) {
       setError(err.message || 'Failed to retrieve products');
     } finally {
       setLoading(false);
     }
-  }, [debouncedSearch, selectedCategory, sortBy]);
+  }, [debouncedSearch, selectedCategory, stockStatus, sortBy, page, limit]);
 
   // Initial load
   useEffect(() => {
@@ -98,6 +115,28 @@ export default function App() {
     const res = await api.createProduct(productData);
     if (res.success) {
       showToast(`Product "${productData.name}" created successfully!`, 'success');
+      await fetchProducts();
+      await fetchCategories();
+      await checkHealth();
+    }
+  };
+
+  // Update product handler
+  const handleUpdateProduct = async (id: number, productData: Partial<CreateProductDTO>) => {
+    const res = await api.updateProduct(id, productData);
+    if (res.success) {
+      showToast(`Product "${productData.name || editingProduct?.name}" updated successfully!`, 'success');
+      await fetchProducts();
+      await fetchCategories();
+      await checkHealth();
+    }
+  };
+
+  // Delete product handler
+  const handleDeleteProduct = async (id: number) => {
+    const res = await api.deleteProduct(id);
+    if (res.success) {
+      showToast(`Product "${deletingProduct?.name}" deleted successfully!`, 'success');
       await fetchProducts();
       await fetchCategories();
       await checkHealth();
@@ -126,19 +165,35 @@ export default function App() {
           </div>
         </section>
 
-        {/* Toolbar (Search & Sort) */}
+        {/* Toolbar (Search, Filter, Stock) */}
         <section className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
           <SearchBar
             search={search}
-            onSearchChange={setSearch}
+            onSearchChange={(val) => {
+              setSearch(val);
+            }}
             sortBy={sortBy}
-            onSortChange={setSortBy}
+            onSortChange={(val) => {
+              setSortBy(val);
+              setPage(1);
+            }}
           />
 
           <CategoryFilter
             categories={categories}
             selectedCategory={selectedCategory}
-            onSelectCategory={setSelectedCategory}
+            onSelectCategory={(cat) => {
+              setSelectedCategory(cat);
+              setPage(1);
+            }}
+          />
+
+          <StockFilter
+            selectedStatus={stockStatus}
+            onSelectStatus={(st) => {
+              setStockStatus(st);
+              setPage(1);
+            }}
           />
         </section>
 
@@ -168,12 +223,14 @@ export default function App() {
               </div>
               <h3 className="text-base font-bold text-slate-800 mb-1">No products found</h3>
               <p className="text-xs text-slate-500 max-w-sm mb-4">
-                We couldn't find any products matching your search criteria. Try adjusting your query or category filters.
+                We couldn't find any products matching your search criteria. Try adjusting your query, category, or stock filters.
               </p>
               <button
                 onClick={() => {
                   setSearch('');
                   setSelectedCategory('All');
+                  setStockStatus('all');
+                  setPage(1);
                 }}
                 className="px-4 py-2 text-xs font-semibold text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-blue-200"
               >
@@ -181,11 +238,32 @@ export default function App() {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {products.map((product) => (
-                <ProductCard key={product.id || product.sku} product={product} />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {products.map((product) => (
+                  <ProductCard
+                    key={product.id || product.sku}
+                    product={product}
+                    onEdit={(prod) => setEditingProduct(prod)}
+                    onDelete={(prod) => setDeletingProduct(prod)}
+                  />
+                ))}
+              </div>
+
+              {pagination && (
+                <Pagination
+                  pagination={pagination}
+                  onPageChange={(newPage) => {
+                    setPage(newPage);
+                    window.scrollTo({ top: 350, behavior: 'smooth' });
+                  }}
+                  onLimitChange={(newLimit) => {
+                    setLimit(newLimit);
+                    setPage(1);
+                  }}
+                />
+              )}
+            </>
           )}
         </section>
       </main>
@@ -203,6 +281,22 @@ export default function App() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleAddProduct}
+      />
+
+      {/* Edit Product Modal */}
+      <EditProductModal
+        isOpen={!!editingProduct}
+        product={editingProduct}
+        onClose={() => setEditingProduct(null)}
+        onSubmit={handleUpdateProduct}
+      />
+
+      {/* Delete Confirm Modal */}
+      <DeleteConfirmModal
+        isOpen={!!deletingProduct}
+        product={deletingProduct}
+        onClose={() => setDeletingProduct(null)}
+        onConfirm={handleDeleteProduct}
       />
 
       {/* Toast Alert */}

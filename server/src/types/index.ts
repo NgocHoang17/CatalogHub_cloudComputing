@@ -24,6 +24,7 @@ export interface CreateProductDTO {
 export interface ProductFilterParams {
   search?: string;
   category?: string;
+  stockStatus?: 'all' | 'in_stock' | 'low_stock' | 'out_of_stock';
   sortBy: string;
   order: 'ASC' | 'DESC';
   page: number;
