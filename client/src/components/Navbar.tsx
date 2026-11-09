@@ -45,6 +45,15 @@ export const Navbar: React.FC<NavbarProps> = ({ health, onOpenAddModal }) => {
                 : 'Connecting to Cloud...'}
             </span>
           </div>
+
+          <button
+            type="button"
+            onClick={onOpenAddModal}
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold shadow-sm shadow-blue-500/25 hover:shadow-md transition-all active:scale-[0.98]"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>New Product</span>
+          </button>
         </div>
       </div>
     </header>

@@ -80,5 +80,20 @@ export const api = {
 
   getStats: (): Promise<ApiResponse<InventoryStats>> =>
     request<ApiResponse<InventoryStats>>('/api/products/stats'),
+
+  uploadImage: async (file: File): Promise<ApiResponse<{ url: string; public_id: string }>> => {
+    const formData = new FormData();
+    formData.append('image', file);
+    const url = `${API_BASE_URL}/api/upload`;
+    const response = await fetch(url, {
+      method: 'POST',
+      body: formData,
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(data.message || `Upload failed with status ${response.status}`);
+    }
+    return data;
+  },
 };
 

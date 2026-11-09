@@ -49,6 +49,7 @@ app.get('/', (req: Request, res: Response) => {
       products: '/api/products',
       categories: '/api/products/categories',
       stats: '/api/products/stats',
+      upload: '/api/upload (POST multipart/form-data)',
     },
   });
 });
