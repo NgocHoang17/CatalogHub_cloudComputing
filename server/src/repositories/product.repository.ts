@@ -133,6 +133,32 @@ export class ProductRepository {
     const rows = await db('products').distinct('category').orderBy('category', 'asc');
     return rows.map((r: any) => r.category).filter(Boolean);
   }
+
+  /**
+   * Get inventory statistics
+   */
+  async getInventoryStats(): Promise<{
+    totalProducts: number;
+    totalValue: number;
+    lowStock: number;
+    outOfStock: number;
+  }> {
+    const result = await db('products')
+      .select(
+        db.raw('COUNT(*) as totalProducts'),
+        db.raw('COALESCE(SUM(price * stock), 0) as totalValue'),
+        db.raw('COALESCE(SUM(CASE WHEN stock BETWEEN 1 AND 10 THEN 1 ELSE 0 END), 0) as lowStock'),
+        db.raw('COALESCE(SUM(CASE WHEN stock <= 0 THEN 1 ELSE 0 END), 0) as outOfStock')
+      )
+      .first();
+
+    return {
+      totalProducts: Number(result?.totalProducts || 0),
+      totalValue: Number(result?.totalValue || 0),
+      lowStock: Number(result?.lowStock || 0),
+      outOfStock: Number(result?.outOfStock || 0),
+    };
+  }
 }
 
 export const productRepository = new ProductRepository();

@@ -1,4 +1,4 @@
-import { Product, CreateProductDTO, ApiResponse, HealthResponse, StockStatus } from '../types/product.ts';
+import { Product, CreateProductDTO, ApiResponse, HealthResponse, StockStatus, InventoryStats } from '../types/product.ts';
 
 const getBaseUrl = (): string => {
   if (import.meta.env.VITE_API_BASE_URL) {
@@ -77,5 +77,8 @@ export const api = {
 
   getCategories: (): Promise<ApiResponse<string[]>> =>
     request<ApiResponse<string[]>>('/api/products/categories'),
+
+  getStats: (): Promise<ApiResponse<InventoryStats>> =>
+    request<ApiResponse<InventoryStats>>('/api/products/stats'),
 };
 

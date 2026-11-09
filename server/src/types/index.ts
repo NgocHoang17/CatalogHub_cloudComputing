@@ -38,6 +38,13 @@ export interface PaginationMeta {
   totalPages: number;
 }
 
+export interface InventoryStats {
+  totalProducts: number;
+  totalValue: number;
+  lowStock: number;
+  outOfStock: number;
+}
+
 export interface HealthResponse {
   status: 'UP' | 'DEGRADED';
   uptimeSeconds: number;
