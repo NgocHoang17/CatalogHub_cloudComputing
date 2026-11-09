@@ -301,5 +301,3 @@ export async function seed(knex) {
   }
 }
 
-}
-
