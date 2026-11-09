@@ -161,6 +161,14 @@ export default function App() {
     }
   };
 
+  // Fallback stats computation if /api/products/stats has not deployed yet
+  const effectiveStats: InventoryStats = stats || {
+    totalProducts: pagination?.total ?? products.length,
+    totalValue: products.reduce((acc, p) => acc + (parseFloat(String(p.price)) || 0) * (p.stock || 0), 0),
+    lowStock: products.filter((p) => p.stock > 0 && p.stock <= 10).length,
+    outOfStock: products.filter((p) => p.stock <= 0).length,
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-slate-50/50">
       <Navbar health={health} onOpenAddModal={() => setIsModalOpen(true)} />
@@ -221,7 +229,7 @@ export default function App() {
 
         {/* Stats KPI Overview Cards */}
         <StatsCards
-          stats={stats}
+          stats={effectiveStats}
           selectedStatus={stockStatus}
           onFilterStatus={(st) => {
             setStockStatus(st);
@@ -351,6 +359,7 @@ export default function App() {
       {/* Add Product Modal */}
       <AddProductModal
         isOpen={isModalOpen}
+        categories={categories}
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleAddProduct}
       />

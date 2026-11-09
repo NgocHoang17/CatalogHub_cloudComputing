@@ -4,15 +4,16 @@ import { CreateProductDTO } from '../types/product.ts';
 
 interface AddProductModalProps {
   isOpen: boolean;
+  categories?: string[];
   onClose: () => void;
   onSubmit: (data: CreateProductDTO) => Promise<void>;
 }
 
-export const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSubmit }) => {
+export const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, categories = [], onClose, onSubmit }) => {
   const [formData, setFormData] = useState({
     sku: '',
     name: '',
-    category: 'Hardware',
+    category: 'Computers',
     price: '',
     stock: '10',
     image_url: '',
@@ -61,7 +62,7 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClos
         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
           <div>
             <h2 className="text-lg font-bold text-slate-900">Add New Product</h2>
-            <p className="text-xs text-slate-500">Insert item directly into Railway MySQL database</p>
+            <p className="text-xs text-slate-500">Enter product details to add to inventory catalog</p>
           </div>
           <button
             onClick={onClose}
@@ -91,7 +92,7 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClos
                 required
                 value={formData.sku}
                 onChange={handleChange}
-                placeholder="e.g. NET-GW-01"
+                placeholder="e.g. LAP-MBP-16"
                 className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm uppercase placeholder:normal-case focus:bg-white focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
               />
             </div>
@@ -103,12 +104,18 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClos
               <input
                 type="text"
                 name="category"
+                list="category-suggestions"
                 required
                 value={formData.category}
                 onChange={handleChange}
-                placeholder="e.g. Networking"
+                placeholder="e.g. Computers"
                 className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
               />
+              <datalist id="category-suggestions">
+                {categories.map((c) => (
+                  <option key={c} value={c} />
+                ))}
+              </datalist>
             </div>
           </div>
 
@@ -122,7 +129,7 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClos
               required
               value={formData.name}
               onChange={handleChange}
-              placeholder="e.g. Cloud Security Edge Router"
+              placeholder="e.g. MacBook Pro 16 M3 Max"
               className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
             />
           </div>
