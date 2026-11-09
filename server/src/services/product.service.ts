@@ -1,7 +1,7 @@
 import { productRepository } from '../repositories/product.repository.js';
 import { AppError } from '../middlewares/error.middleware.js';
 import { db } from '../config/database.js';
-import { Product, CreateProductDTO, ProductFilterParams, PaginationMeta, HealthResponse } from '../types/index.js';
+import { Product, CreateProductDTO, ProductFilterParams, PaginationMeta, HealthResponse, InventoryStats } from '../types/index.js';
 
 export class ProductService {
   async getProducts(params: ProductFilterParams): Promise<{ items: Product[]; pagination: PaginationMeta }> {
@@ -60,6 +60,10 @@ export class ProductService {
 
   async getCategories(): Promise<string[]> {
     return productRepository.findDistinctCategories();
+  }
+
+  async getStats(): Promise<InventoryStats> {
+    return productRepository.getInventoryStats();
   }
 
   async getHealthMetrics(): Promise<HealthResponse> {

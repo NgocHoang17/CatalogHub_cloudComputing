@@ -28,6 +28,11 @@ router.get(
 );
 
 router.get(
+  '/stats',
+  productController.getStats.bind(productController)
+);
+
+router.get(
   '/:id',
   validate(productIdParamSchema),
   productController.getProductById.bind(productController)

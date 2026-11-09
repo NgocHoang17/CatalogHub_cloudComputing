@@ -114,7 +114,9 @@ export class ProductRepository {
    * Update an existing product
    */
   async updateProduct(id: number, data: Partial<CreateProductDTO>): Promise<Product | undefined> {
-    await db('products').where({ id }).update(data);
+    if (Object.keys(data).length > 0) {
+      await db('products').where({ id }).update(data);
+    }
     return this.findById(id);
   }
 
@@ -132,6 +134,32 @@ export class ProductRepository {
   async findDistinctCategories(): Promise<string[]> {
     const rows = await db('products').distinct('category').orderBy('category', 'asc');
     return rows.map((r: any) => r.category).filter(Boolean);
+  }
+
+  /**
+   * Get inventory statistics
+   */
+  async getInventoryStats(): Promise<{
+    totalProducts: number;
+    totalValue: number;
+    lowStock: number;
+    outOfStock: number;
+  }> {
+    const result = await db('products')
+      .select(
+        db.raw('COUNT(*) as totalProducts'),
+        db.raw('COALESCE(SUM(price * stock), 0) as totalValue'),
+        db.raw('COALESCE(SUM(CASE WHEN stock BETWEEN 1 AND 10 THEN 1 ELSE 0 END), 0) as lowStock'),
+        db.raw('COALESCE(SUM(CASE WHEN stock <= 0 THEN 1 ELSE 0 END), 0) as outOfStock')
+      )
+      .first();
+
+    return {
+      totalProducts: Number(result?.totalProducts || 0),
+      totalValue: Number(result?.totalValue || 0),
+      lowStock: Number(result?.lowStock || 0),
+      outOfStock: Number(result?.outOfStock || 0),
+    };
   }
 }
 
