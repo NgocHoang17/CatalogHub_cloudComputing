@@ -1,29 +1,43 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Navbar } from './components/Navbar.tsx';
+import { StatsCards } from './components/StatsCards.tsx';
 import { SearchBar } from './components/SearchBar.tsx';
 import { CategoryFilter } from './components/CategoryFilter.tsx';
+import { StockFilter } from './components/StockFilter.tsx';
+import { Pagination } from './components/Pagination.tsx';
+import { ProductTable } from './components/ProductTable.tsx';
 import { ProductCard } from './components/ProductCard.tsx';
 import { AddProductModal } from './components/AddProductModal.tsx';
+import { EditProductModal } from './components/EditProductModal.tsx';
+import { DeleteConfirmModal } from './components/DeleteConfirmModal.tsx';
 import { Toast } from './components/Toast.tsx';
 import { api } from './services/api.ts';
-import { Product, HealthResponse, CreateProductDTO, ToastMessage } from './types/product.ts';
-import { Loader2, PackageSearch, RefreshCw } from 'lucide-react';
+import { Product, HealthResponse, CreateProductDTO, ToastMessage, StockStatus, PaginationMeta, InventoryStats } from './types/product.ts';
+import { Loader2, PackageSearch, RefreshCw, LayoutList, LayoutGrid, Plus } from 'lucide-react';
 
 export default function App() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
+  const [stats, setStats] = useState<InventoryStats | null>(null);
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
 
-  // Filter States
+  // Filter & Pagination States
   const [search, setSearch] = useState<string>('');
   const [debouncedSearch, setDebouncedSearch] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [stockStatus, setStockStatus] = useState<StockStatus>('all');
   const [sortBy, setSortBy] = useState<string>('created_at-DESC');
+  const [page, setPage] = useState<number>(1);
+  const [limit, setLimit] = useState<number>(12);
+  const [pagination, setPagination] = useState<PaginationMeta | null>(null);
 
   // Modal & Toast States
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
   const [toast, setToast] = useState<ToastMessage | null>(null);
 
   // Show Toast Helper
@@ -36,6 +50,7 @@ export default function App() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
+      setPage(1);
     }, 300);
     return () => clearTimeout(timer);
   }, [search]);
@@ -60,6 +75,16 @@ export default function App() {
     }
   }, []);
 
+  // Fetch inventory stats
+  const fetchStats = useCallback(async () => {
+    try {
+      const res = await api.getStats();
+      if (res.success) setStats(res.data);
+    } catch (err) {
+      console.warn('Could not load inventory stats:', err);
+    }
+  }, []);
+
   // Fetch products
   const fetchProducts = useCallback(async () => {
     try {
@@ -69,24 +94,31 @@ export default function App() {
       const res = await api.getProducts({
         search: debouncedSearch,
         category: selectedCategory,
+        stockStatus,
         sortBy: col,
         order: dir,
+        page,
+        limit,
       });
       if (res.success) {
         setProducts(res.data);
+        if (res.pagination) {
+          setPagination(res.pagination);
+        }
       }
     } catch (err: any) {
       setError(err.message || 'Failed to retrieve products');
     } finally {
       setLoading(false);
     }
-  }, [debouncedSearch, selectedCategory, sortBy]);
+  }, [debouncedSearch, selectedCategory, stockStatus, sortBy, page, limit]);
 
   // Initial load
   useEffect(() => {
     checkHealth();
     fetchCategories();
-  }, [checkHealth, fetchCategories]);
+    fetchStats();
+  }, [checkHealth, fetchCategories, fetchStats]);
 
   // Reload products on filter changes
   useEffect(() => {
@@ -100,45 +132,140 @@ export default function App() {
       showToast(`Product "${productData.name}" created successfully!`, 'success');
       await fetchProducts();
       await fetchCategories();
+      await fetchStats();
       await checkHealth();
     }
   };
 
+  // Update product handler
+  const handleUpdateProduct = async (id: number, productData: Partial<CreateProductDTO>) => {
+    const res = await api.updateProduct(id, productData);
+    if (res.success) {
+      showToast(`Product "${productData.name || editingProduct?.name}" updated successfully!`, 'success');
+      await fetchProducts();
+      await fetchCategories();
+      await fetchStats();
+      await checkHealth();
+    }
+  };
+
+  // Delete product handler
+  const handleDeleteProduct = async (id: number) => {
+    const res = await api.deleteProduct(id);
+    if (res.success) {
+      showToast(`Product "${deletingProduct?.name}" deleted successfully!`, 'success');
+      await fetchProducts();
+      await fetchCategories();
+      await fetchStats();
+      await checkHealth();
+    }
+  };
+
+  // Fallback stats computation if /api/products/stats has not deployed yet
+  const effectiveStats: InventoryStats = stats || {
+    totalProducts: pagination?.total ?? products.length,
+    totalValue: products.reduce((acc, p) => acc + (parseFloat(String(p.price)) || 0) * (p.stock || 0), 0),
+    lowStock: products.filter((p) => p.stock > 0 && p.stock <= 10).length,
+    outOfStock: products.filter((p) => p.stock <= 0).length,
+  };
+
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-slate-50/50">
       <Navbar health={health} onOpenAddModal={() => setIsModalOpen(true)} />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-        {/* Hero Banner */}
-        <section className="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white rounded-3xl p-8 sm:p-10 shadow-xl relative overflow-hidden">
-          <div className="absolute right-0 top-0 bottom-0 w-1/2 opacity-10 pointer-events-none bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-400 via-transparent to-transparent" />
-          <div className="relative z-10 max-w-2xl">
-            <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-300 border border-blue-400/30 mb-3">
-              TypeScript &bull; Cloud Computing Project
-            </span>
-            <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight mb-3">
-              Product Inventory & Cloud Catalog
+        {/* Page Title & Action Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1">
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              Product Inventory
             </h2>
-            <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-              Decoupled cloud architecture featuring Cloudflare Pages (Frontend Edge CDN), 
-              NodeJS TypeScript Express (Railway PaaS), and MySQL Managed Database connected via Railway Private Networking.
+            <p className="text-sm text-slate-500 mt-1">
+              Manage catalog items, monitor real-time stock levels, and update product pricing.
             </p>
           </div>
-        </section>
 
-        {/* Toolbar (Search & Sort) */}
+          <div className="flex items-center gap-3">
+            {/* View Mode Toggle */}
+            <div className="bg-slate-200/70 p-1 rounded-xl flex items-center border border-slate-200">
+              <button
+                type="button"
+                onClick={() => setViewMode('table')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                  viewMode === 'table'
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+                title="Table View"
+              >
+                <LayoutList className="w-4 h-4" />
+                <span>Table</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('grid')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                  viewMode === 'grid'
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+                title="Grid View"
+              >
+                <LayoutGrid className="w-4 h-4" />
+                <span>Grid</span>
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setIsModalOpen(true)}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold shadow-sm shadow-blue-500/25 hover:shadow-md transition-all active:scale-[0.98]"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Add Product</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Stats KPI Overview Cards */}
+        <StatsCards
+          stats={effectiveStats}
+          selectedStatus={stockStatus}
+          onFilterStatus={(st) => {
+            setStockStatus(st);
+            setPage(1);
+          }}
+        />
+
+        {/* Toolbar (Search, Filter, Stock) */}
         <section className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
           <SearchBar
             search={search}
-            onSearchChange={setSearch}
+            onSearchChange={(val) => {
+              setSearch(val);
+            }}
             sortBy={sortBy}
-            onSortChange={setSortBy}
+            onSortChange={(val) => {
+              setSortBy(val);
+              setPage(1);
+            }}
           />
 
           <CategoryFilter
             categories={categories}
             selectedCategory={selectedCategory}
-            onSelectCategory={setSelectedCategory}
+            onSelectCategory={(cat) => {
+              setSelectedCategory(cat);
+              setPage(1);
+            }}
+          />
+
+          <StockFilter
+            selectedStatus={stockStatus}
+            onSelectStatus={(st) => {
+              setStockStatus(st);
+              setPage(1);
+            }}
           />
         </section>
 
@@ -168,12 +295,14 @@ export default function App() {
               </div>
               <h3 className="text-base font-bold text-slate-800 mb-1">No products found</h3>
               <p className="text-xs text-slate-500 max-w-sm mb-4">
-                We couldn't find any products matching your search criteria. Try adjusting your query or category filters.
+                We couldn't find any products matching your search criteria. Try adjusting your query, category, or stock filters.
               </p>
               <button
                 onClick={() => {
                   setSearch('');
                   setSelectedCategory('All');
+                  setStockStatus('all');
+                  setPage(1);
                 }}
                 className="px-4 py-2 text-xs font-semibold text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-blue-200"
               >
@@ -181,11 +310,40 @@ export default function App() {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {products.map((product) => (
-                <ProductCard key={product.id || product.sku} product={product} />
-              ))}
-            </div>
+            <>
+              {viewMode === 'table' ? (
+                <ProductTable
+                  products={products}
+                  onEdit={(prod) => setEditingProduct(prod)}
+                  onDelete={(prod) => setDeletingProduct(prod)}
+                />
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {products.map((product) => (
+                    <ProductCard
+                      key={product.id || product.sku}
+                      product={product}
+                      onEdit={(prod) => setEditingProduct(prod)}
+                      onDelete={(prod) => setDeletingProduct(prod)}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {pagination && (
+                <Pagination
+                  pagination={pagination}
+                  onPageChange={(newPage) => {
+                    setPage(newPage);
+                    window.scrollTo({ top: 350, behavior: 'smooth' });
+                  }}
+                  onLimitChange={(newLimit) => {
+                    setLimit(newLimit);
+                    setPage(1);
+                  }}
+                />
+              )}
+            </>
           )}
         </section>
       </main>
@@ -193,16 +351,33 @@ export default function App() {
       {/* Footer */}
       <footer className="bg-white border-t border-slate-200 py-6 mt-12">
         <div className="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500 space-y-1">
-          <p className="font-semibold text-slate-700">CatalogHub &bull; Cloud Computing Final Project (TypeScript Edition)</p>
-          <p>Frontend: Cloudflare Pages &bull; Backend: Railway NodeJS Container &bull; DB: Railway MySQL Private Mesh</p>
+          <p className="font-semibold text-slate-700">CatalogHub &bull; Product & Inventory Management Platform</p>
+          <p>Frontend: Cloudflare Pages &bull; Backend: Railway Node.js &bull; Database: Railway MySQL</p>
         </div>
       </footer>
 
       {/* Add Product Modal */}
       <AddProductModal
         isOpen={isModalOpen}
+        categories={categories}
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleAddProduct}
+      />
+
+      {/* Edit Product Modal */}
+      <EditProductModal
+        isOpen={!!editingProduct}
+        product={editingProduct}
+        onClose={() => setEditingProduct(null)}
+        onSubmit={handleUpdateProduct}
+      />
+
+      {/* Delete Confirm Modal */}
+      <DeleteConfirmModal
+        isOpen={!!deletingProduct}
+        product={deletingProduct}
+        onClose={() => setDeletingProduct(null)}
+        onConfirm={handleDeleteProduct}
       />
 
       {/* Toast Alert */}

@@ -41,11 +41,15 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/', (req: Request, res: Response) => {
   res.json({
     service: 'CatalogHub API Service',
+    version: '1.1.0',
+    status: 'ONLINE',
     environment: env.NODE_ENV,
     endpoints: {
       health: '/api/health',
       products: '/api/products',
       categories: '/api/products/categories',
+      stats: '/api/products/stats',
+      upload: '/api/upload (POST multipart/form-data)',
     },
   });
 });

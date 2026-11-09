@@ -24,6 +24,7 @@ export interface CreateProductDTO {
 export interface ProductFilterParams {
   search?: string;
   category?: string;
+  stockStatus?: 'all' | 'in_stock' | 'low_stock' | 'out_of_stock';
   sortBy: string;
   order: 'ASC' | 'DESC';
   page: number;
@@ -35,6 +36,13 @@ export interface PaginationMeta {
   page: number;
   limit: number;
   totalPages: number;
+}
+
+export interface InventoryStats {
+  totalProducts: number;
+  totalValue: number;
+  lowStock: number;
+  outOfStock: number;
 }
 
 export interface HealthResponse {

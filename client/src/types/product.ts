@@ -21,6 +21,15 @@ export interface CreateProductDTO {
   description?: string;
 }
 
+export type StockStatus = 'all' | 'in_stock' | 'low_stock' | 'out_of_stock';
+
+export interface InventoryStats {
+  totalProducts: number;
+  totalValue: number;
+  lowStock: number;
+  outOfStock: number;
+}
+
 export interface PaginationMeta {
   total: number;
   page: number;

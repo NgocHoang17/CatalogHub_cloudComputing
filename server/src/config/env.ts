@@ -20,6 +20,10 @@ const envSchema = z.object({
   MYSQLPASSWORD: z.string().optional(),
   MYSQLDATABASE: z.string().optional(),
   MYSQL_URL: z.string().optional(),
+  // Cloudinary credentials (Approach 2)
+  CLOUDINARY_CLOUD_NAME: z.string().optional(),
+  CLOUDINARY_API_KEY: z.string().optional(),
+  CLOUDINARY_API_SECRET: z.string().optional(),
 });
 
 const parsed = envSchema.safeParse(process.env);

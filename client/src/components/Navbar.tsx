@@ -21,10 +21,10 @@ export const Navbar: React.FC<NavbarProps> = ({ health, onOpenAddModal }) => {
             <div className="flex items-center gap-2">
               <h1 className="text-lg font-bold text-slate-900 tracking-tight">CatalogHub</h1>
               <span className="text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-                TypeScript &bull; Cloud Native
+                v1.1.0 &bull; Inventory System
               </span>
             </div>
-            <p className="text-xs text-slate-500">NodeJS TS + MySQL + Cloudflare Pages + Railway</p>
+            <p className="text-xs text-slate-500">Product & Inventory Management Platform</p>
           </div>
         </div>
 
@@ -47,11 +47,12 @@ export const Navbar: React.FC<NavbarProps> = ({ health, onOpenAddModal }) => {
           </div>
 
           <button
+            type="button"
             onClick={onOpenAddModal}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold shadow-sm shadow-blue-500/25 hover:shadow-md transition-all active:scale-[0.98]"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold shadow-sm shadow-blue-500/25 hover:shadow-md transition-all active:scale-[0.98]"
           >
-            <Plus className="w-4 h-4" />
-            <span>Add Product</span>
+            <Plus className="w-3.5 h-3.5" />
+            <span>New Product</span>
           </button>
         </div>
       </div>

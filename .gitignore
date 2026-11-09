@@ -15,6 +15,7 @@ build/
 out/
 .cache/
 *.tsbuildinfo
+client/vite.config.js
 
 # Logs
 logs/
