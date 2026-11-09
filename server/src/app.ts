@@ -48,6 +48,7 @@ app.get('/', (req: Request, res: Response) => {
       health: '/api/health',
       products: '/api/products',
       categories: '/api/products/categories',
+      stats: '/api/products/stats',
     },
   });
 });

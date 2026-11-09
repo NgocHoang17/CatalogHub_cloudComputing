@@ -114,7 +114,9 @@ export class ProductRepository {
    * Update an existing product
    */
   async updateProduct(id: number, data: Partial<CreateProductDTO>): Promise<Product | undefined> {
-    await db('products').where({ id }).update(data);
+    if (Object.keys(data).length > 0) {
+      await db('products').where({ id }).update(data);
+    }
     return this.findById(id);
   }
 
