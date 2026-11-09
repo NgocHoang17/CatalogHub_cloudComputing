@@ -21,7 +21,7 @@ export const Navbar: React.FC<NavbarProps> = ({ health, onOpenAddModal }) => {
             <div className="flex items-center gap-2">
               <h1 className="text-lg font-bold text-slate-900 tracking-tight">CatalogHub</h1>
               <span className="text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-                TypeScript &bull; Cloud Native
+                v1.1.0 &bull; Cloud Native
               </span>
             </div>
             <p className="text-xs text-slate-500">NodeJS TS + MySQL + Cloudflare Pages + Railway</p>
